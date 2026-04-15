@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.starter.pathing.path
  *
  * Behaves like [DriveOnlyTeleOp] during normal driving, with two extra buttons:
  *
- *  - **Triangle (Y)** — Pedro-follows to the triangle-tip position at the top of
- *    the field. Press again, or move a stick, or press Cross to cancel mid-path.
+ *  - **Triangle (Y)** — Pedro-follows to waypoint A (configurable in Panels).
+ *    Press again, or move a stick, or press Cross to cancel mid-path.
  *  - **Cross (A)** — Pedro-follows to field center. Same interrupt rules.
  *
  * After each path (completed or interrupted) control returns to manual teleop
@@ -31,10 +31,10 @@ import org.firstinspires.ftc.teamcode.starter.pathing.path
 class LocalizationTestTeleOp : OpModeBase() {
 
     companion object {
-        /** X coordinate of the triangle-tip target (inches). Adjust for your field. */
-        @JvmField var triangleTipX: Double = 70.75
-        /** Y coordinate of the triangle-tip target (inches). Adjust for your field. */
-        @JvmField var triangleTipY: Double = 130.0
+        /** X coordinate of waypoint A (inches). Adjust for your field. */
+        @JvmField var waypointAX: Double = 70.75
+        /** Y coordinate of waypoint A (inches). Adjust for your field. */
+        @JvmField var waypointAY: Double = 70.75
 
         /** X coordinate of the field-center target (inches). */
         @JvmField var fieldCenterX: Double = 70.75
@@ -48,7 +48,7 @@ class LocalizationTestTeleOp : OpModeBase() {
     private lateinit var drive: MecanumDriveSubsystem
     private lateinit var localizer: Localizer
 
-    private enum class State { TELEOP, PATH_TO_TRIANGLE, PATH_TO_CENTER }
+    private enum class State { TELEOP, PATH_TO_WAYPOINT_A, PATH_TO_CENTER }
     private var state = State.TELEOP
 
     override fun configure() {
@@ -82,14 +82,14 @@ class LocalizationTestTeleOp : OpModeBase() {
 
                 // Path triggers — must come after the drive call so stick reads are fresh.
                 if (driver.yPressed) {
-                    goTo(Pose(triangleTipX, triangleTipY, 0.0), State.PATH_TO_TRIANGLE)
+                    goTo(Pose(waypointAX, waypointAY, 0.0), State.PATH_TO_WAYPOINT_A)
                 }
                 if (driver.aPressed) {
                     goTo(Pose(fieldCenterX, fieldCenterY, 0.0), State.PATH_TO_CENTER)
                 }
             }
 
-            State.PATH_TO_TRIANGLE, State.PATH_TO_CENTER -> {
+            State.PATH_TO_WAYPOINT_A, State.PATH_TO_CENTER -> {
                 if (shouldInterrupt()) {
                     cancelPath()
                 } else if (!drive.isFollowing) {
@@ -131,7 +131,7 @@ class LocalizationTestTeleOp : OpModeBase() {
 
     private fun emitTelemetry() {
         val targetLabel = when (state) {
-            State.PATH_TO_TRIANGLE -> "(%.1f, %.1f)".format(triangleTipX, triangleTipY)
+            State.PATH_TO_WAYPOINT_A -> "(%.1f, %.1f)".format(waypointAX, waypointAY)
             State.PATH_TO_CENTER   -> "(%.1f, %.1f)".format(fieldCenterX, fieldCenterY)
             State.TELEOP           -> "—"
         }
